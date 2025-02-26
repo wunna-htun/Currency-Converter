@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter - MMK/USD/THB</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1, h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        h2 {
+            font-size: 1.2em;
+            margin-top: 30px;
+        }
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            cursor: pointer;
+            background-color: #f8f9fa;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            background-color: #007bff;
+            color: white;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+        }
+        .settings-toggle {
+            text-align: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            color: #007bff;
+            text-decoration: underline;
+        }
+        .settings-panel {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .rates-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .rate-info {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+        .conversion-form {
+            display: none;
+        }
+        .conversion-form.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        .btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #218838;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9f7ef;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .result-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #16a085;
+        }
+        .exchange-rate {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #95a5a6;
+        }
+        .form-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .form-row > div {
+            flex: 1;
+        }
+        @media (max-width: 600px) {
+            .form-row {
+                flex-direction: column;
+            }
+            .rates-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Currency Converter</h1>
+        
+        <div class="settings-toggle" onclick="toggleSettings()">
+            ⚙️ Exchange Rate Settings
+        </div>
+        
+        <div id="settings-panel" class="settings-panel">
+            <h2>Custom Exchange Rates</h2>
+            <p>Edit any rate and the others will automatically update to maintain consistency.</p>
+            
+            <div class="rates-grid">
+                <div class="form-group">
+                    <label for="rate-usd-mmk">1 USD to MMK</label>
+                    <input type="number" id="rate-usd-mmk" value="2100" min="0.01" step="0.01" oninput="updateRelatedRates('usd-mmk')">
+                    <div class="rate-info">Primary rate</div>
+                </div>
+                <div class="form-group">
+                    <label for="rate-mmk-usd">1 MMK to USD</label>
+                    <input type="number" id="rate-mmk-usd" value="0.000476" min="0.000001" step="0.000001" readonly>
+                    <div class="rate-info">Auto-calculated</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="rate-usd-thb">1 USD to THB</label>
+                    <input type="number" id="rate-usd-thb" value="35.7" min="0.01" step="0.01" oninput="updateRelatedRates('usd-thb')">
+                    <div class="rate-info">Primary rate</div>
+                </div>
+                <div class="form-group">
+                    <label for="rate-thb-usd">1 THB to USD</label>
+                    <input type="number" id="rate-thb-usd" value="0.028" min="0.000001" step="0.000001" readonly>
+                    <div class="rate-info">Auto-calculated</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="rate-thb-mmk">1 THB to MMK</label>
+                    <input type="number" id="rate-thb-mmk" value="58.82" min="0.01" step="0.01" oninput="updateRelatedRates('thb-mmk')">
+                    <div class="rate-info">Primary rate</div>
+                </div>
+                <div class="form-group">
+                    <label for="rate-mmk-thb">1 MMK to THB</label>
+                    <input type="number" id="rate-mmk-thb" value="0.017" min="0.000001" step="0.000001" readonly>
+                    <div class="rate-info">Auto-calculated</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab(0)">MMK to USD/THB</div>
+            <div class="tab" onclick="switchTab(1)">USD to MMK/THB</div>
+            <div class="tab" onclick="switchTab(2)">THB to MMK/USD</div>
+        </div>
+        
+        <!-- MMK Conversion -->
+        <div class="conversion-form active" id="mmk-form">
+            <div class="form-group">
+                <label for="mmk-amount">Amount (Myanmar Kyat)</label>
+                <input type="number" id="mmk-amount" placeholder="Enter amount in MMK" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="mmk-target">Convert to</label>
+                <select id="mmk-target">
+                    <option value="usd">US Dollar (USD)</option>
+                    <option value="thb">Thai Baht (THB)</option>
+                    <option value="both">Both USD and THB</option>
+                </select>
+            </div>
+            
+            <button class="btn" onclick="convertFromMMK()">Convert</button>
+            
+            <div class="result" id="mmk-result" style="display: none;">
+                <div id="mmk-usd-result" style="display: none;">
+                    <div class="result-amount" id="mmk-usd-amount"></div>
+                    <div class="exchange-rate" id="mmk-usd-rate"></div>
+                </div>
+                <div id="mmk-thb-result" style="display: none;">
+                    <div class="result-amount" id="mmk-thb-amount"></div>
+                    <div class="exchange-rate" id="mmk-thb-rate"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- USD Conversion -->
+        <div class="conversion-form" id="usd-form">
+            <div class="form-group">
+                <label for="usd-amount">Amount (US Dollar)</label>
+                <input type="number" id="usd-amount" placeholder="Enter amount in USD" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="usd-target">Convert to</label>
+                <select id="usd-target">
+                    <option value="mmk">Myanmar Kyat (MMK)</option>
+                    <option value="thb">Thai Baht (THB)</option>
+                    <option value="both">Both MMK and THB</option>
+                </select>
+            </div>
+            
+            <button class="btn" onclick="convertFromUSD()">Convert</button>
+            
+            <div class="result" id="usd-result" style="display: none;">
+                <div id="usd-mmk-result" style="display: none;">
+                    <div class="result-amount" id="usd-mmk-amount"></div>
+                    <div class="exchange-rate" id="usd-mmk-rate"></div>
+                </div>
+                <div id="usd-thb-result" style="display: none;">
+                    <div class="result-amount" id="usd-thb-amount"></div>
+                    <div class="exchange-rate" id="usd-thb-rate"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- THB Conversion -->
+        <div class="conversion-form" id="thb-form">
+            <div class="form-group">
+                <label for="thb-amount">Amount (Thai Baht)</label>
+                <input type="number" id="thb-amount" placeholder="Enter amount in THB" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="thb-target">Convert to</label>
+                <select id="thb-target">
+                    <option value="mmk">Myanmar Kyat (MMK)</option>
+                    <option value="usd">US Dollar (USD)</option>
+                    <option value="both">Both MMK and USD</option>
+                </select>
+            </div>
+            
+            <button class="btn" onclick="convertFromTHB()">Convert</button>
+            
+            <div class="result" id="thb-result" style="display: none;">
+                <div id="thb-mmk-result" style="display: none;">
+                    <div class="result-amount" id="thb-mmk-amount"></div>
+                    <div class="exchange-rate" id="thb-mmk-rate"></div>
+                </div>
+                <div id="thb-usd-result" style="display: none;">
+                    <div class="result-amount" id="thb-usd-amount"></div>
+                    <div class="exchange-rate" id="thb-usd-rate"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Exchange rates can be customized in settings</p>
+            <p>Last rates update: <span id="last-updated">Default rates</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Default conversion rates
+        let rates = {
+            mmk_to_usd: 0.000225,  // 1 MMK = 0.000476 USD
+            mmk_to_thb: 0.007576,     // 1 MMK = 0.017 THB
+            usd_to_mmk: 4453,      // 1 USD = 2100 MMK
+            usd_to_thb: 33.85,      // 1 USD = 35.7 THB
+            thb_to_mmk: 132,     // 1 THB = 58.82 MMK
+            thb_to_usd: 0.029542     // 1 THB = 0.028 USD
+        };
+        
+        // Function to update related rates when one is changed
+        
+        
+        function updateRelatedRates(changedRate) {
+    const now = new Date();
+    
+    if (changedRate === 'usd-mmk') {
+        // Only update USD-MMK pair
+        const usdToMmk = parseFloat(document.getElementById('rate-usd-mmk').value);
+        if (isNaN(usdToMmk) || usdToMmk <= 0) return;
+        
+        rates.usd_to_mmk = usdToMmk;
+        rates.mmk_to_usd = roundToSixDecimals(1 / usdToMmk);
+    } 
+    else if (changedRate === 'usd-thb') {
+        // Only update USD-THB pair
+        const usdToThb = parseFloat(document.getElementById('rate-usd-thb').value);
+        if (isNaN(usdToThb) || usdToThb <= 0) return;
+        
+        rates.usd_to_thb = usdToThb;
+        rates.thb_to_usd = roundToSixDecimals(1 / usdToThb);
+    } 
+    else if (changedRate === 'thb-mmk') {
+        // Only update THB-MMK pair
+        const thbToMmk = parseFloat(document.getElementById('rate-thb-mmk').value);
+        if (isNaN(thbToMmk) || thbToMmk <= 0) return;
+        
+        rates.thb_to_mmk = thbToMmk;
+        rates.mmk_to_thb = roundToSixDecimals(1 / thbToMmk);
+    }
+    
+    // Update all form fields
+    document.getElementById('rate-usd-mmk').value = rates.usd_to_mmk;
+    document.getElementById('rate-mmk-usd').value = rates.mmk_to_usd;
+    document.getElementById('rate-usd-thb').value = rates.usd_to_thb;
+    document.getElementById('rate-thb-usd').value = rates.thb_to_usd;
+    document.getElementById('rate-thb-mmk').value = rates.thb_to_mmk;
+    document.getElementById('rate-mmk-thb').value = rates.mmk_to_thb;
+    
+    // Update timestamp and reset results
+    document.getElementById('last-updated').textContent = now.toLocaleString();
+    document.getElementById('mmk-result').style.display = 'none';
+    document.getElementById('usd-result').style.display = 'none';
+    document.getElementById('thb-result').style.display = 'none';
+}
+        // Helper function to round to 6 decimal places (for small values)
+        function roundToSixDecimals(num) {
+            return Math.round(num * 1000000) / 1000000;
+        }
+        
+        // Helper function to round to 2 decimal places
+        function roundToTwoDecimals(num) {
+            return Math.round(num * 100) / 100;
+        }
+
+        // Toggle settings panel
+        function toggleSettings() {
+            const panel = document.getElementById('settings-panel');
+            if (panel.style.display === 'block') {
+                panel.style.display = 'none';
+            } else {
+                panel.style.display = 'block';
+            }
+        }
+
+        function switchTab(tabIndex) {
+            const tabs = document.querySelectorAll('.tab');
+            const forms = document.querySelectorAll('.conversion-form');
+            
+            // Hide all results
+            document.getElementById('mmk-result').style.display = 'none';
+            document.getElementById('usd-result').style.display = 'none';
+            document.getElementById('thb-result').style.display = 'none';
+            
+            // Reset active state
+            tabs.forEach(tab => tab.classList.remove('active'));
+            forms.forEach(form => form.classList.remove('active'));
+            
+            // Set active state for selected tab
+            tabs[tabIndex].classList.add('active');
+            forms[tabIndex].classList.add('active');
+        }
+        
+        function convertFromMMK() {
+            const amount = parseFloat(document.getElementById('mmk-amount').value);
+            const target = document.getElementById('mmk-target').value;
+            const resultDiv = document.getElementById('mmk-result');
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            
+            if (target === 'usd' || target === 'both') {
+                const usdAmount = amount * rates.mmk_to_usd;
+                document.getElementById('mmk-usd-result').style.display = 'block';
+                document.getElementById('mmk-usd-amount').textContent = `${amount.toLocaleString()} MMK = ${usdAmount.toFixed(2)} USD`;
+                document.getElementById('mmk-usd-rate').textContent = `1 MMK = ${rates.mmk_to_usd.toFixed(6)} USD`;
+            } else {
+                document.getElementById('mmk-usd-result').style.display = 'none';
+            }
+            
+            if (target === 'thb' || target === 'both') {
+                const thbAmount = amount * rates.mmk_to_thb;
+                document.getElementById('mmk-thb-result').style.display = 'block';
+                document.getElementById('mmk-thb-amount').textContent = `${amount.toLocaleString()} MMK = ${thbAmount.toFixed(2)} THB`;
+                document.getElementById('mmk-thb-rate').textContent = `1 MMK = ${rates.mmk_to_thb.toFixed(4)} THB`;
+            } else {
+                document.getElementById('mmk-thb-result').style.display = 'none';
+            }
+        }
+        
+        function convertFromUSD() {
+            const amount = parseFloat(document.getElementById('usd-amount').value);
+            const target = document.getElementById('usd-target').value;
+            const resultDiv = document.getElementById('usd-result');
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            
+            if (target === 'mmk' || target === 'both') {
+                const mmkAmount = amount * rates.usd_to_mmk;
+                document.getElementById('usd-mmk-result').style.display = 'block';
+                document.getElementById('usd-mmk-amount').textContent = `${amount.toLocaleString()} USD = ${mmkAmount.toLocaleString()} MMK`;
+                document.getElementById('usd-mmk-rate').textContent = `1 USD = ${rates.usd_to_mmk.toLocaleString()} MMK`;
+            } else {
+                document.getElementById('usd-mmk-result').style.display = 'none';
+            }
+            
+            if (target === 'thb' || target === 'both') {
+                const thbAmount = amount * rates.usd_to_thb;
+                document.getElementById('usd-thb-result').style.display = 'block';
+                document.getElementById('usd-thb-amount').textContent = `${amount.toLocaleString()} USD = ${thbAmount.toFixed(2)} THB`;
+                document.getElementById('usd-thb-rate').textContent = `1 USD = ${rates.usd_to_thb.toFixed(2)} THB`;
+            } else {
+                document.getElementById('usd-thb-result').style.display = 'none';
+            }
+        }
+        
+        function convertFromTHB() {
+            const amount = parseFloat(document.getElementById('thb-amount').value);
+            const target = document.getElementById('thb-target').value;
+            const resultDiv = document.getElementById('thb-result');
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount');
+                return;
+            }
+            
+            resultDiv.style.display = 'block';
+            
+            if (target === 'mmk' || target === 'both') {
+                const mmkAmount = amount * rates.thb_to_mmk;
+                document.getElementById('thb-mmk-result').style.display = 'block';
+                document.getElementById('thb-mmk-amount').textContent = `${amount.toLocaleString()} THB = ${mmkAmount.toLocaleString()} MMK`;
+                document.getElementById('thb-mmk-rate').textContent = `1 THB = ${rates.thb_to_mmk.toLocaleString()} MMK`;
+            } else {
+                document.getElementById('thb-mmk-result').style.display = 'none';
+            }
+            
+            if (target === 'usd' || target === 'both') {
+                const usdAmount = amount * rates.thb_to_usd;
+                document.getElementById('thb-usd-result').style.display = 'block';
+                document.getElementById('thb-usd-amount').textContent = `${amount.toLocaleString()} THB = ${usdAmount.toFixed(2)} USD`;
+                document.getElementById('thb-usd-rate').textContent = `1 THB = ${rates.thb_to_usd.toFixed(4)} USD`;
+            } else {
+                document.getElementById('thb-usd-result').style.display = 'none';
+            }
+        }
+
+        // Initialize form with default exchange rates
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('rate-usd-mmk').value = rates.usd_to_mmk;
+            document.getElementById('rate-mmk-usd').value = rates.mmk_to_usd;
+            document.getElementById('rate-usd-thb').value = rates.usd_to_thb;
+            document.getElementById('rate-thb-usd').value = rates.thb_to_usd;
+            document.getElementById('rate-thb-mmk').value = rates.thb_to_mmk;
+            document.getElementById('rate-mmk-thb').value = rates.mmk_to_thb;
+        });
+    </script>
+</body>
+</html>
