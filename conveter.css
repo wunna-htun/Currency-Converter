@@ -1,0 +1,149 @@
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+    color: #333;
+}
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+h1, h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+}
+h2 {
+    font-size: 1.2em;
+    margin-top: 30px;
+}
+.tabs {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+.tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    transition: all 0.3s;
+}
+.tab.active {
+    background-color: #007bff;
+    color: white;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.settings-toggle {
+    text-align: center;
+    margin-bottom: 15px;
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: underline;
+}
+.settings-panel {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    display: none;
+}
+.rates-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.rate-info {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 3px;
+}
+.conversion-form {
+    display: none;
+}
+.conversion-form.active {
+    display: block;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+input, select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+.btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+.btn:hover {
+    background-color: #218838;
+}
+.btn-secondary {
+    background-color: #6c757d;
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+.result {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #e9f7ef;
+    border-radius: 4px;
+    text-align: center;
+}
+.result-amount {
+    font-size: 24px;
+    font-weight: bold;
+    color: #16a085;
+}
+.exchange-rate {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #7f8c8d;
+}
+.footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 14px;
+    color: #95a5a6;
+}
+.form-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+.form-row > div {
+    flex: 1;
+}
+@media (max-width: 600px) {
+    .form-row {
+        flex-direction: column;
+    }
+    .rates-grid {
+        grid-template-columns: 1fr;
+    }
+}
